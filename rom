@@ -1,0 +1,28 @@
+module rom(input logic [4:0] adr,
+output logic [28:0] dout):
+    always_comb
+        case(adr)
+            5'b00000: dout = 29'b00_0_1_0_0_1_0_10_00_10_??_??_00_??_?_?_00001; //Fetch
+            5'b00001: dout = 29'b00_0_0_0_0_0_?_10_00_10_??_xx_00_xx_x_x_01010; //Decode
+            5'b00010: dout = 29'b00_0_0_0_0_0_?_??_00_01_01_??_00_01_x_x_01011; //MemAdr
+            5'b00011: dout = 29'b00_0_0_0_0_0_1_00_??_??_??_??_??_01_x_x_00100; //memread
+            5'b00100: dout = 29'b00_0_0_1_0_0_?_01_??_??_??_??_??_01_x_x_00000; //memwb
+            5'b00101: dout = 29'b00_0_0_0_1_0_1_00_??_??_??_??_??_01_x_x_00000; //memwrite
+            5'b00110: dout = 29'bxx_0_0_0_0_0_?_??_00_00_??_??_xx_00_x_0_01000; //executeR
+            5'b00111: dout = 29'bxx_0_0_0_0_0_?_??_00_01_00_??_xx_00_x_1_01000; //executeI
+            5'b01000: dout = 29'b00_0_0_1_0_0_?_00_??_??_??_??_??_00_x_x_00000; //AluWb
+            5'b01001: dout = 29'b00_1_0_0_0_0_?_10_00_01_10_??_00_10_?_?_00000; //Branch
+        endcase
+endmodule
+module sequenceLogic    (input  logic  [4:0]  tempNextAdr,
+                         input  logic  [1:0]  op,
+                         input  logic  [5:0]  func,
+                         output logic  [4:0]  realNextAdr
+                        );
+
+    logic [4:0] temp10,temp11;
+
+    assign realNextAdr = (tempNextAdr == 5'b01010) ? temp10 : ((tempNextAdr==5'b01011) ? temp11 : tempNextAdr); 
+    assign temp10 = (op==2'b01) ? 5'b00010 : (op==2'b10) ? 5'b01001 : (func[5]) ? 5'b00111 : 5'b00110;
+    assign temp11 = (func[0]) ? 5'b00011: 5'b00101;
+endmodule
